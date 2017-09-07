@@ -6,6 +6,7 @@ import { ControlPanel } from './components/ControlPanel'
 import { ThemeEditor } from './components/ThemeEditor'
 import { SyntaxDisplay } from './components/SyntaxDisplay'
 import './App.css';
+import sampleThemeUrl from './resources/One Dark.xccolortheme'
 
 const BACKGROUND_COLOR_PLIST_KEY = 'DVTSourceTextBackground'
 const COLORS_PLIST_KEY = 'DVTSourceTextSyntaxColors'
@@ -23,15 +24,18 @@ class App extends Component {
         this.onFileChoose = this.onFileChoose.bind(this)
         this.onSyntaxItemUpdate = this.onSyntaxItemUpdate.bind(this)
         this.onSettingChange = this.onSettingChange.bind(this)
+        this.onLoadSampleTheme = this.onLoadSampleTheme.bind(this)
+        this.loadThemeFile = this.loadThemeFile.bind(this)
+    }
+
+    onLoadSampleTheme() {
+        fetch(sampleThemeUrl)
+            .then(res => res.text())
+            .then(this.loadThemeFile)
     }
 
     onFileChoose(file) {
-        readFile(file).then(themeFile => {
-            const plist = fileToPlist(themeFile)
-            const syntaxItems = themePlistToSyntaxItems(plist)
-            const backgroundColor = parsePlistColor(plist[BACKGROUND_COLOR_PLIST_KEY])
-            this.setState({ syntaxItems, backgroundColor })
-        })
+        readFile(file).then(this.loadThemeFile)
     }
 
     onSyntaxItemUpdate(updatedItem) {
@@ -61,12 +65,21 @@ class App extends Component {
         })
     }
 
+    loadThemeFile(themeFile) {
+        const plist = fileToPlist(themeFile)
+        const syntaxItems = themePlistToSyntaxItems(plist)
+        const backgroundColor = parsePlistColor(plist[BACKGROUND_COLOR_PLIST_KEY])
+        this.setState({ syntaxItems, backgroundColor })
+    }
+
     render() {
         const hideXcodePrefix = this.state.settings["ui.hideXcodePrefix"].value
         return (
             <div className="App">
                 <div className="App-header">
                     <FileSelector onChoose={this.onFileChoose} />
+                    or
+                    <input type="button" value="Load sample" onClick={this.onLoadSampleTheme} />
                 </div>
                 <div className="App-intro">
                     <ControlPanel settings={this.state.settings} onSettingChange={this.onSettingChange} />
