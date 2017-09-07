@@ -2,6 +2,7 @@
     text-align: left;
     
     &__code {
+        margin-top: 0;
         padding: 1em 1em 1em 0.5em;
         overflow-x: scroll;
         counter-reset: line;
