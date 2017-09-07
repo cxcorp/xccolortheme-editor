@@ -68,6 +68,7 @@ export class ControlPanel extends Component {
 
         return (
             <div className="control-panel">
+                <p className="control-panel__title">Settings</p>
                 <ul className="control-panel__list">
                     {settings}
                 </ul>

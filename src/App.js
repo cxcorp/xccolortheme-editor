@@ -77,12 +77,16 @@ class App extends Component {
         return (
             <div className="App">
                 <div className="App-header">
-                    <FileSelector onChoose={this.onFileChoose} />
-                    or
-                    <input type="button" value="Load sample" onClick={this.onLoadSampleTheme} />
+                    <div>
+                        <FileSelector onChoose={this.onFileChoose} />
+                        or
+                        <input type="button" value="Load sample" onClick={this.onLoadSampleTheme} />
+                    </div>
+                    <div>
+                        <ControlPanel settings={this.state.settings} onSettingChange={this.onSettingChange} />
+                    </div>
                 </div>
                 <div className="App-intro">
-                    <ControlPanel settings={this.state.settings} onSettingChange={this.onSettingChange} />
                     <div className="App-intro__controls">
                         <SyntaxDisplay syntaxItems={this.state.syntaxItems} backgroundColor={this.state.backgroundColor} />
                         <ThemeEditor syntaxItems={this.state.syntaxItems} hideXcodePrefix={hideXcodePrefix} onUpdate={this.onSyntaxItemUpdate} />

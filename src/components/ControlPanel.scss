@@ -1,5 +1,13 @@
 .control-panel {
+    text-align: left;
+    padding: 0 2em;
+
     &__list {
         columns: 3;
+        list-style: none;
+    }
+
+    &__title {
+        font-size: 1.2em;
     }
 }
