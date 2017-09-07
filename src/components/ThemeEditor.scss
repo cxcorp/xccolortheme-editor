@@ -1,5 +1,6 @@
 .theme-editor {
     text-align: left;
+    font-size: 16px;
 
     &__header-element {
         width: 12.5em;
@@ -7,23 +8,38 @@
 }
 
 .theme-item {
+    font-size: 0.9em;
+
     &__color, &__font, &__name {
-        padding: 0.2em 0.5em;
+        padding: 0.2em 0;
     }
 
     &__color input:not([type="color"]), &__font input, &__name input {
-        padding: 0.2em 0.5em;
-        font-size: 16px;
+        padding: 0.2em 0.2em;
+    }
+
+    &__color-hex, &__color-opacity,
+    &__font-name, &__font-size {
+        height: 16px;
+    }
+
+    &__color-picker {
+        width: 2em;
+        height: 20px;
+    }
+
+    &__color-hex, &__font-size {
+        width: 4.5em;
+    }
+
+    &__color-opacity {
+        width: 2em;
     }
 
     &__name {
         font-size: 0.9em;
         max-width: 12.5em;
         overflow-x: scroll;
-    }
-
-    &__color-hex, &__color-opacity, &__font-size {
-        width: 4.5em;
     }
 
     &__font-size {

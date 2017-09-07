@@ -5,7 +5,7 @@ export function clamp(min, max, val) {
 }
 
 // 0.0 => 0, 0.5 => 127, 1.0 => 255
-const normalizedComponentToRgb = (c) => clamp(0, 255, Math.round(c * 255))
+export const normalizedComponentToRgb = (c) => clamp(0, 255, Math.round(c * 255))
 // 0 => 0, 127 => 7f, 255 => ff
 const rgbComponentToHex = (c) => {
     const hex = c.toString(16)

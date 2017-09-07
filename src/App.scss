@@ -16,6 +16,22 @@
 
 .App-intro {
   font-size: large;
+
+  &__controls {
+    width: 100%;
+    padding: 2em;
+
+    .syntax-display, .theme-editor {
+      width: calc(50% - 2em);
+      float: left;
+    }
+  }
+
+  &__controls:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
 }
 
 @keyframes App-logo-spin {

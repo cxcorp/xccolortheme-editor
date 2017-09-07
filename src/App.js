@@ -4,7 +4,12 @@ import React, { Component } from 'react'
 import { FileSelector } from './components/FileSelector'
 import { ControlPanel } from './components/ControlPanel'
 import { ThemeEditor } from './components/ThemeEditor'
+import { SyntaxDisplay } from './components/SyntaxDisplay'
 import './App.css';
+
+const BACKGROUND_COLOR_PLIST_KEY = 'DVTSourceTextBackground'
+const COLORS_PLIST_KEY = 'DVTSourceTextSyntaxColors'
+const FONTS_PLIST_KEY = 'DVTSourceTextSyntaxFonts'
 
 class App extends Component {
     constructor(props) {
@@ -24,29 +29,36 @@ class App extends Component {
         readFile(file).then(themeFile => {
             const plist = fileToPlist(themeFile)
             const syntaxItems = themePlistToSyntaxItems(plist)
-            this.setState({ syntaxItems })
+            const backgroundColor = parsePlistColor(plist[BACKGROUND_COLOR_PLIST_KEY])
+            this.setState({ syntaxItems, backgroundColor })
         })
     }
 
     onSyntaxItemUpdate(updatedItem) {
-        const key = updatedItem.name
-        const newItems = {
-            ...this.state.syntaxItems,
-            [key]: updatedItem
-        }
-        this.setState({ syntaxItems: newItems })
+        this.setState((prevState, props) => {
+            const key = updatedItem.name
+            const newItems = {
+                ...prevState.syntaxItems,
+                [key]: updatedItem
+            }
+            return { syntaxItems: newItems }
+        })
     }
 
+    // TODO: make bg color changeable
+
     onSettingChange(settingName, newValue) {
-        const newSetting = {
-            ...this.state.settings[settingName],
-            value: newValue
-        }
-        const newSettings = {
-            ...this.state.settings,
-            [settingName]: newSetting
-        }
-        this.setState({ settings: newSettings })
+        this.setState((prevState, props) => {
+            const newSetting = {
+                ...prevState.settings[settingName],
+                value: newValue
+            }
+            const newSettings = {
+                ...prevState.settings,
+                [settingName]: newSetting
+            }
+            return { settings: newSettings }
+        })
     }
 
     render() {
@@ -58,7 +70,10 @@ class App extends Component {
                 </div>
                 <div className="App-intro">
                     <ControlPanel settings={this.state.settings} onSettingChange={this.onSettingChange} />
-                    <ThemeEditor syntaxItems={this.state.syntaxItems} hideXcodePrefix={hideXcodePrefix} onUpdate={this.onSyntaxItemUpdate} />
+                    <div className="App-intro__controls">
+                        <SyntaxDisplay syntaxItems={this.state.syntaxItems} backgroundColor={this.state.backgroundColor} />
+                        <ThemeEditor syntaxItems={this.state.syntaxItems} hideXcodePrefix={hideXcodePrefix} onUpdate={this.onSyntaxItemUpdate} />
+                    </div>
                 </div>
             </div>
         );
@@ -77,9 +92,6 @@ function readFile(file) {
 function fileToPlist(file) {
     return plist.parse(file)
 }
-
-const COLORS_PLIST_KEY = 'DVTSourceTextSyntaxColors'
-const FONTS_PLIST_KEY = 'DVTSourceTextSyntaxFonts'
 
 function themePlistToSyntaxItems(plist) {
     const colors = plist[COLORS_PLIST_KEY]

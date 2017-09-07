@@ -1,0 +1,33 @@
+.syntax-display {
+    text-align: left;
+    
+    &__code {
+        padding: 1em 1em 1em 0.5em;
+        overflow-x: scroll;
+        counter-reset: line;
+    }
+
+    &__line {
+        outline: none;
+    }
+
+    &__line:before {
+        counter-increment: line;
+        content: counter(line);
+        display: inline-block;
+        padding: 0 1em;
+        margin-right: .5em;
+        color: #888;
+        text-align: right;
+    }
+}
+
+.syntax {
+    box-sizing: border-box;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.syntax:hover {
+    box-shadow: 0 0 0 2px #4a90e2;
+}
