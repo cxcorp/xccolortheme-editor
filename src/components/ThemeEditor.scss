@@ -1,0 +1,38 @@
+.theme-editor {
+    text-align: left;
+
+    &__header-element {
+        width: 12.5em;
+    }
+}
+
+.theme-item {
+    &__color, &__font, &__name {
+        padding: 0.2em 0.5em;
+    }
+
+    &__color input:not([type="color"]), &__font input, &__name input {
+        padding: 0.2em 0.5em;
+        font-size: 16px;
+    }
+
+    &__name {
+        font-size: 0.9em;
+        max-width: 12.5em;
+        overflow-x: scroll;
+    }
+
+    &__color-hex, &__color-opacity, &__font-size {
+        width: 4.5em;
+    }
+
+    &__font-size {
+        text-align: right;
+    }
+}
+
+.theme-editor__header-row {
+    th {
+        padding: 0.2em 0.5em;
+    }
+}
