@@ -18,7 +18,7 @@ class App extends Component {
         this.state = {
             syntaxItems: null,
             settings: {
-                "ui.hideXcodePrefix": { value: false, desc: 'Hide xcode prefix from names' }
+                "ui.hideXcodePrefix": { value: true, desc: 'Hide xcode prefix from names' }
             }
         }
         this.onFileChoose = this.onFileChoose.bind(this)
