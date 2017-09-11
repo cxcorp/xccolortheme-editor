@@ -26,7 +26,7 @@ export class FileSelector extends Component {
         return (
             <div className="file-selector">
                 <p>{currentFileText}</p>
-                <input type='file' onChange={this.openFile} />
+                <input type='file' accept=".xccolortheme,.dvtcolortheme" onChange={this.openFile} />
             </div>
         )
     }
