@@ -2,6 +2,7 @@ import * as Promise from 'bluebird'
 import * as plist from 'plist'
 import React, { Component } from 'react'
 import * as Bacon from 'baconjs'
+import * as FileSaver from 'file-saver'
 import { FileSelector } from './components/FileSelector'
 import { ControlPanel } from './components/ControlPanel'
 import { ThemeEditor } from './components/ThemeEditor'
@@ -13,11 +14,17 @@ const BACKGROUND_COLOR_PLIST_KEY = 'DVTSourceTextBackground'
 const COLORS_PLIST_KEY = 'DVTSourceTextSyntaxColors'
 const FONTS_PLIST_KEY = 'DVTSourceTextSyntaxFonts'
 
+const DEFAULT_PLIST_FONT = 'monospace - 12'
+const DEFAULT_PLIST_COLOR = '0.894 0.521 0.796 1' // pretty pink
+const MAX_PLIST_DECIMAL_PRECISION = 7
+
 class App extends Component {
     constructor(props) {
         super(props)
         this.state = {
+            plist: null,
             syntaxItems: null,
+            fileName: null,
             settings: {
                 "ui.hideXcodePrefix": { value: true, desc: 'Hide xcode prefix from names' }
             }
@@ -30,6 +37,7 @@ class App extends Component {
         this.onSettingChange = this.onSettingChange.bind(this)
         this.onLoadSampleTheme = this.onLoadSampleTheme.bind(this)
         this.loadThemeFile = this.loadThemeFile.bind(this)
+        this.onExportClicked = this.onExportClicked.bind(this)
     }
 
     onLoadSampleTheme() {
@@ -69,11 +77,23 @@ class App extends Component {
         })
     }
 
+    onExportClicked() {
+        if (!this.state.plist || !this.state.syntaxItems) return
+        const { colors, fonts } = syntaxItemsToPlistFontsAndColors(this.state.syntaxItems)
+        const newPlist = {
+            ...this.state.plist,
+            [COLORS_PLIST_KEY]: colors,
+            [FONTS_PLIST_KEY]: fonts
+        }
+        const exportData = plist.build(newPlist)
+        saveString(exportData, 'filename.xccolortheme', 'application/xml;charset=utf-8')
+    }
+
     loadThemeFile(themeFile) {
         const plist = fileToPlist(themeFile)
         const syntaxItems = themePlistToSyntaxItems(plist)
         const backgroundColor = parsePlistColor(plist[BACKGROUND_COLOR_PLIST_KEY])
-        this.setState({ syntaxItems, backgroundColor })
+        this.setState({ plist, syntaxItems, backgroundColor })
     }
 
     render() {
@@ -101,6 +121,10 @@ class App extends Component {
                         or
                         <input type="button" value="Load sample" onClick={this.onLoadSampleTheme} />
                     </div>
+                    <div className="file-exporter">
+                        <p>Export theme file</p>
+                        <input type="button" value="Export" onClick={this.onExportClicked} />
+                    </div>
                     <div>
                         <ControlPanel settings={this.state.settings} onSettingChange={this.onSettingChange} />
                     </div>
@@ -114,6 +138,11 @@ class App extends Component {
             </div>
         );
     }
+}
+
+function saveString(data, filename, type) {
+    const file = new Blob([data], { type })
+    FileSaver.saveAs(file, filename)
 }
 
 // File => Promise<string>
@@ -156,6 +185,15 @@ function parsePlistColor(plistColor) {
     return { r, g, b, a }
 }
 
+function colorToPlistColor(color) {
+    if (!color) return undefined
+    const { r, g, b, a } = color
+    return [r, g, b, a]
+        .map(c => c.toPrecision(MAX_PLIST_DECIMAL_PRECISION))
+        .map(c => `${c}`)
+        .join(' ')
+}
+
 // match e.g. "Input-Regular - 14.0" => ["Input-Regular", "14.0"]
 const FONT_REGEX = /^(.+) - (\d+(?:\.\d+)*)$/
 
@@ -169,6 +207,24 @@ function parsePlistFont(plistFont) {
     const size = parseFloat(sizeStr)
     if (isNaN(size)) return undefined
     return { name, size }
+}
+
+function fontToPlistFont(font) {
+    if (!font) return undefined
+    return `${font.name} - ${font.size}`
+}
+
+function syntaxItemsToPlistFontsAndColors(syntaxItems) {
+    const colors = {}
+    const fonts = {}
+
+    for (const itemKey of Object.keys(syntaxItems)) {
+        const { color, font } = syntaxItems[itemKey]
+        colors[itemKey] = colorToPlistColor(color) || DEFAULT_PLIST_COLOR
+        fonts[itemKey] = fontToPlistFont(font) || DEFAULT_PLIST_FONT
+    }
+
+    return { colors, fonts }
 }
 
 export default App
