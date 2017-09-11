@@ -1,6 +1,7 @@
 import * as Promise from 'bluebird'
 import * as plist from 'plist'
 import React, { Component } from 'react'
+import * as Bacon from 'baconjs'
 import { FileSelector } from './components/FileSelector'
 import { ControlPanel } from './components/ControlPanel'
 import { ThemeEditor } from './components/ThemeEditor'
@@ -21,6 +22,9 @@ class App extends Component {
                 "ui.hideXcodePrefix": { value: true, desc: 'Hide xcode prefix from names' }
             }
         }
+
+        this.itemFocusRequestedBus = new Bacon.Bus() // plz forgif
+
         this.onFileChoose = this.onFileChoose.bind(this)
         this.onSyntaxItemUpdate = this.onSyntaxItemUpdate.bind(this)
         this.onSettingChange = this.onSettingChange.bind(this)
@@ -74,6 +78,21 @@ class App extends Component {
 
     render() {
         const hideXcodePrefix = this.state.settings["ui.hideXcodePrefix"].value
+
+        const themeEditor =
+            <ThemeEditor
+                syntaxItems={this.state.syntaxItems}
+                hideXcodePrefix={hideXcodePrefix}
+                onUpdate={this.onSyntaxItemUpdate}
+                itemFocusRequestedE={this.itemFocusRequestedBus}
+            />
+        const syntaxDisplay =
+            <SyntaxDisplay
+                syntaxItems={this.state.syntaxItems}
+                backgroundColor={this.state.backgroundColor}
+                onRequestItemFocus={p => this.itemFocusRequestedBus.push(p)}
+            />
+
         return (
             <div className="App">
                 <div className="App-header">
@@ -88,8 +107,8 @@ class App extends Component {
                 </div>
                 <div className="App-intro">
                     <div className="App-intro__controls">
-                        <SyntaxDisplay syntaxItems={this.state.syntaxItems} backgroundColor={this.state.backgroundColor} />
-                        <ThemeEditor syntaxItems={this.state.syntaxItems} hideXcodePrefix={hideXcodePrefix} onUpdate={this.onSyntaxItemUpdate} />
+                        {syntaxDisplay}
+                        {themeEditor}
                     </div>
                 </div>
             </div>

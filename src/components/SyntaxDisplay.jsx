@@ -4,8 +4,8 @@ import './SyntaxDisplay.css'
 
 const SYNTAX_PLAIN_TEXT = 'xcode.syntax.plain'
 
-export function SyntaxDisplay({ syntaxItems, backgroundColor }) {
-    const Syntax = createSyntaxFactory(syntaxItems)
+export function SyntaxDisplay({ syntaxItems, backgroundColor, onRequestItemFocus }) {
+    const Syntax = createSyntaxFactory(syntaxItems, onRequestItemFocus)
 
     const preStyle = { backgroundColor: colorToCssRgba(backgroundColor) }
     // Style "plain" specially so that the entire thing isn't a clausterfuck of wrapped <Style />
@@ -73,7 +73,7 @@ function Line({ children }) {
     return (<div className="syntax-display__line" tabIndex={0}>{children}</div>)
 }
 
-function createSyntaxFactory(syntaxItems) {
+function createSyntaxFactory(syntaxItems, onRequestItemFocus) {
     if (!syntaxItems) {
         return function UnstyledSyntax({ name, children }) {
             return (
@@ -82,6 +82,10 @@ function createSyntaxFactory(syntaxItems) {
         }
     }
 
+    const onSyntaxClick = e => {
+        const itemName = e.target.dataset.tokenName
+        onRequestItemFocus(itemName)
+    }
     return function Syntax({ name, children }) {
         const plistName = nameToPlistName(name)
         const colorAndFont = syntaxItems[plistName]
@@ -102,6 +106,7 @@ function createSyntaxFactory(syntaxItems) {
                 className="syntax"
                 data-token-name={name}
                 title={name}
+                onClick={onSyntaxClick}
             >
                 {children}
             </span>

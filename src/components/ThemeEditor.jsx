@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import * as Bacon from 'baconjs'
 import { decimalRgbToHex, hexToDecimalRgb } from '../util'
 import './ThemeEditor.css'
 
@@ -9,22 +10,61 @@ type Item = { readonly name: string, color: Color, font: Font }
 type Props = {
     syntaxItems: [key: string]: { color: Color, font: Font } },
     onUpdate: (Item) => void,
-    hideXcodePrefix: boolean
+    hideXcodePrefix: boolean,
+    itemFocusRequestedE: Bacon.EventStream<string>
 }
 */
+
 export class ThemeEditor extends Component {
     constructor(props) {
         super(props)
+
+        this.itemNameToRef = {}
+        this.itemFocusRequestedUnsub = null
+
         this.onItemUpdate = this.onItemUpdate.bind(this)
+        this.onRef = this.onRef.bind(this)
+        this.requestItemFocus = this.requestItemFocus.bind(this)
+    }
+
+    requestItemFocus(itemName) {
+        const ref = this.itemNameToRef[itemName]
+        if (!ref) return
+        ref.scrollIntoView()
+        ref.focus()
     }
 
     onItemUpdate(newItem) {
         this.props.onUpdate(newItem)
     }
 
+    onRef(ref) {
+        const name = ref.dataset.name
+        if (!name) return
+        this.itemNameToRef[name] = ref
+    }
+
+    componentWillMount() {
+        this.itemFocusRequestedUnsub = this.props.itemFocusRequestedE.onValue(this.requestItemFocus)
+    }
+
+    componentWillUnmount() {
+        this.itemFocusRequestedUnsub && this.itemFocusRequestedUnsub()
+    }
+
     render() {
         const items = gatherItems(this.props.syntaxItems || [])
-        const rows = items.map(i => <ThemeItem key={i.name} item={i} onUpdate={this.onItemUpdate} hideXcodePrefix={this.props.hideXcodePrefix} />)
+        const rows = items.map(i => {
+            return (
+                <ThemeItem
+                    key={i.name}
+                    item={i}
+                    onUpdate={this.onItemUpdate}
+                    inputRef={this.onRef}
+                    hideXcodePrefix={this.props.hideXcodePrefix}
+                />
+            )
+        })
         return (
             <div className="theme-editor">
                 <table>
@@ -49,7 +89,12 @@ const XCODE_NAME_PREFIX_REGEX = /^xcode\.syntax\./
 /*type Color = { r: number, g: number, b: number, a: number }
 type Font = { name: string, size: number }
 type Item = { readonly name: string, color: Color, font: Font }
-type Props = { item: Item, onUpdate: (Item) => void, hideXcodePrefix: boolean }
+type Props = {
+    item: Item,
+    onUpdate: (Item) => void,
+    inputRef: (HTMLELement??) => void,
+    hideXcodePrefix: boolean
+}
 */
 class ThemeItem extends Component {
     constructor(props) {
@@ -85,7 +130,7 @@ class ThemeItem extends Component {
         }
 
         return (
-            <tr className="theme-item">
+            <tr className="theme-item" tabIndex={-1} data-name={name} ref={this.props.inputRef}>
                 <td className="theme-item__name"><code>{name}</code></td>
                 <ThemeItemColor color={color} onUpdate={this.onColorUpdate} />
                 <ThemeItemFont font={font} onUpdate={this.onFontUpdate} />
